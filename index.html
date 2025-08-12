@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ค้นหาหนัง ซีรีส์ คลิปฟรี ถูกลิขสิทธิ์</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- เพิ่ม: ไลบรารีสำหรับสร้าง Pop-up สวยงาม -->
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -84,16 +83,16 @@
         </header>
         
         <div class="search-container rounded-2xl p-8 md:p-16 mb-8 text-center shadow-2xl">
-            <!-- แก้ไข: จัดกลุ่มภาษาไทยและอังกฤษ -->
             <h2 class="text-3xl md:text-5xl font-bold mb-2 text-white">ค้นพบหนัง ซีรีส์ และคลิปที่คุณชื่นชอบ</h2>
             <p class="text-gray-300 max-w-2xl mx-auto">แหล่งรวมคอนเทนต์ฟรี ถูกลิขสิทธิ์ ส่งตรงถึงหน้าจอคุณ</p>
-            
             <p class="text-lg text-gray-300 mt-4">Discover your favorite movies, series, and clips</p>
             <p class="text-gray-400 mb-8 max-w-2xl mx-auto">A collection of free, legal content, delivered to your screen</p>
             
-            <form id="search-form" class="max-w-2xl mx-auto" onsubmit="return false;">
+            <!-- แก้ไข: เปลี่ยนมาใช้ form submit -->
+            <form id="search-form" class="max-w-2xl mx-auto">
                 <div class="flex items-center bg-gray-900 rounded-full shadow-lg p-2 border-2 border-gray-700 focus-within:border-cyan-500 focus-within:ring-2 focus-within:ring-cyan-500/50 transition-all duration-300">
-                    <input type="text" id="search-input" placeholder="พิมพ์เพื่อค้นหาทันที..." class="w-full bg-transparent border-none text-white focus:ring-0 focus:outline-none text-lg px-4 py-2 placeholder-gray-500">
+                    <input type="text" id="search-input" placeholder="พิมพ์ชื่อเรื่องที่ต้องการค้นหา..." class="w-full bg-transparent border-none text-white focus:ring-0 focus:outline-none text-lg px-4 py-2 placeholder-gray-500">
+                    <button type="submit" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-full transition duration-300 flex-shrink-0">ค้นหา</button>
                 </div>
             </form>
             <p class="text-sm text-gray-400 mt-4 italic">"Can't find what you're looking for? Search with us."</p>
@@ -124,7 +123,7 @@
         </div>
 
         <main id="results-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- Live search results will be injected here -->
+            <!-- Search results will be injected here -->
         </main>
         
         <div id="message-container" class="text-center py-16">
@@ -147,6 +146,7 @@
         let nextPageToken = '';
 
         // --- DOM Elements ---
+        const searchForm = document.getElementById('search-form'); // แก้ไข: เพิ่ม form element
         const searchInput = document.getElementById('search-input');
         const resultsContainer = document.getElementById('results-container');
         const messageContainer = document.getElementById('message-container');
@@ -159,15 +159,6 @@
         const externalSearchContainer = document.getElementById('external-search-container');
         const searchFacebookBtn = document.getElementById('search-facebook-btn');
         const searchTiktokBtn = document.getElementById('search-tiktok-btn');
-
-        // --- Debounce Function ---
-        function debounce(func, delay) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), delay);
-            };
-        }
 
         // --- Search Logic ---
         const searchYouTube = async (query, pageToken = '') => {
@@ -198,11 +189,11 @@
 
             try {
                 const response = await fetch(API_URL);
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error.message);
+                if (!response.ok) { // Check for non-2xx responses
+                    const errorData = await response.json();
+                    throw new Error(errorData.error.message || 'Unknown API Error');
                 }
+                const data = await response.json();
                 
                 nextPageToken = data.nextPageToken;
                 displayResults(data.items, !pageToken);
@@ -218,13 +209,15 @@
         };
 
         // --- Event Listeners ---
-        searchInput.addEventListener('input', debounce((e) => {
-            const query = e.target.value.trim();
+        // แก้ไข: เปลี่ยนจาก 'input' เป็น 'submit'
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+            const query = searchInput.value.trim();
             currentQuery = query;
             nextPageToken = '';
             playerWrapper.classList.add('hidden');
             searchYouTube(query);
-        }, 500));
+        });
 
         loadMoreBtn.addEventListener('click', () => {
             if (currentQuery && nextPageToken) {
