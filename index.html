@@ -88,7 +88,6 @@
             <p class="text-lg text-gray-300 mt-4">Discover your favorite movies, series, and clips</p>
             <p class="text-gray-400 mb-8 max-w-2xl mx-auto">A collection of free, legal content, delivered to your screen</p>
             
-            <!-- แก้ไข: เปลี่ยนมาใช้ form submit -->
             <form id="search-form" class="max-w-2xl mx-auto">
                 <div class="flex items-center bg-gray-900 rounded-full shadow-lg p-2 border-2 border-gray-700 focus-within:border-cyan-500 focus-within:ring-2 focus-within:ring-cyan-500/50 transition-all duration-300">
                     <input type="text" id="search-input" placeholder="พิมพ์ชื่อเรื่องที่ต้องการค้นหา..." class="w-full bg-transparent border-none text-white focus:ring-0 focus:outline-none text-lg px-4 py-2 placeholder-gray-500">
@@ -146,7 +145,7 @@
         let nextPageToken = '';
 
         // --- DOM Elements ---
-        const searchForm = document.getElementById('search-form'); // แก้ไข: เพิ่ม form element
+        const searchForm = document.getElementById('search-form');
         const searchInput = document.getElementById('search-input');
         const resultsContainer = document.getElementById('results-container');
         const messageContainer = document.getElementById('message-container');
@@ -189,11 +188,15 @@
 
             try {
                 const response = await fetch(API_URL);
-                if (!response.ok) { // Check for non-2xx responses
-                    const errorData = await response.json();
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: { message: 'Failed to parse error response.' } }));
                     throw new Error(errorData.error.message || 'Unknown API Error');
                 }
                 const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
                 
                 nextPageToken = data.nextPageToken;
                 displayResults(data.items, !pageToken);
@@ -209,9 +212,8 @@
         };
 
         // --- Event Listeners ---
-        // แก้ไข: เปลี่ยนจาก 'input' เป็น 'submit'
         searchForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // ป้องกันการรีเฟรชหน้า
+            e.preventDefault();
             const query = searchInput.value.trim();
             currentQuery = query;
             nextPageToken = '';
@@ -246,6 +248,13 @@
 
         // --- Display Results Function ---
         function displayResults(items, isNewSearch) {
+            // แก้ไข: เพิ่มการตรวจสอบว่า items มีอยู่จริงหรือไม่
+            if (!items) {
+                // หาก items ไม่มีอยู่ (เช่น API ส่ง error กลับมา) ให้หยุดการทำงานของฟังก์ชันนี้
+                // ข้อความ error จะถูกจัดการในส่วนของ catch block อยู่แล้ว
+                return;
+            }
+
             if (isNewSearch) {
                 resultsContainer.innerHTML = '';
             }
