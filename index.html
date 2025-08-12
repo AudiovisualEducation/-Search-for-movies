@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ค้นหาหนัง ซีรีส์ คลิปฟรี ถูกลิขสิทธิ์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'IBM Plex Sans Thai', sans-serif;
+            background-color: #111827;
+            scroll-behavior: smooth;
+        }
+        .search-container {
+            background-color: #1f2937;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.1), 0 6px 6px rgba(0, 255, 255, 0.1);
+        }
+        .coffee-button {
+            transition: all 0.3s ease;
+        }
+        .coffee-button:hover {
+            transform: scale(1.1);
+            background-color: #f9a8d4;
+        }
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: #06b6d4; /* cyan-500 */
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #player-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: #000;
+            border-radius: 1rem;
+        }
+        #player-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #player-wrapper.hidden, .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl md:text-4xl font-bold text-cyan-400 tracking-wider">MovieFinder</h1>
+            <a href="#" id="coffee-btn" class="coffee-button bg-pink-300 text-gray-900 font-bold py-2 px-4 rounded-full flex items-center space-x-2 shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 2.25c.39-.52.99-.84 1.65-.84h.008c.66 0 1.26.32 1.65.84C18.3 3.05 19 4.23 19 5.5V8h-1V5.5c0-1.02-.45-1.9-1.16-2.49a.6.6 0 00-.84.6V8h-1V3.75a.6.6 0 00-.84-.6C13.45 2.65 13 3.53 13 4.5V8H3v2.5A2.5 2.5 0 005.5 13H8v4.5A2.5 2.5 0 0010.5 20h.008a2.5 2.5 0 002.5-2.5V13h2.5a2.5 2.5 0 002.5-2.5V8h-1V5.5c0-1.27.7-2.45 1.75-3.25z" />
+                </svg>
+                <span class="hidden md:inline">เลี้ยงกาแฟ</span>
+            </a>
+        </header>
+        
+        <div class="search-container rounded-2xl p-8 md:p-16 mb-8 text-center shadow-2xl">
+            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-white">ค้นพบหนัง ซีรีส์ และคลิปที่คุณชื่นชอบ</h2>
+            <p class="text-gray-300 mb-8 max-w-2xl mx-auto">แหล่งรวมคอนเทนต์ฟรี ถูกลิขสิทธิ์ ส่งตรงถึงหน้าจอคุณ</p>
+            <form id="search-form" class="max-w-2xl mx-auto" onsubmit="return false;">
+                <div class="flex items-center bg-gray-900 rounded-full shadow-lg p-2 border-2 border-gray-700 focus-within:border-cyan-500 focus-within:ring-2 focus-within:ring-cyan-500/50 transition-all duration-300">
+                    <input type="text" id="search-input" placeholder="พิมพ์เพื่อค้นหาทันที..." class="w-full bg-transparent border-none text-white focus:ring-0 focus:outline-none text-lg px-4 py-2 placeholder-gray-500">
+                </div>
+            </form>
+            <!-- เพิ่ม: ปุ่มค้นหาในแพลตฟอร์มอื่น -->
+            <div id="external-search-container" class="mt-6 hidden">
+                <p class="text-gray-400 mb-3">หรือค้นหาเพิ่มเติมในแพลตฟอร์มอื่น:</p>
+                <div class="flex justify-center items-center space-x-4">
+                    <button id="search-facebook-btn" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full transition-transform transform hover:scale-105">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.323-1.325z"/></svg>
+                        <span>Facebook</span>
+                    </button>
+                    <button id="search-tiktok-btn" class="flex items-center space-x-2 bg-gray-900 hover:bg-black text-white font-semibold py-2 px-4 rounded-full transition-transform transform hover:scale-105 border border-gray-600">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.06 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.04-5.36-.01-4.03-.01-8.05.02-12.07z"/></svg>
+                        <span>TikTok</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="player-wrapper" class="hidden mb-8">
+            <div class="flex justify-end mb-2">
+                <button id="close-player-btn" class="text-gray-400 hover:text-white">&times; ปิด</button>
+            </div>
+            <div id="player-container">
+                <iframe id="youtube-player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+            <h3 id="player-title" class="text-center text-lg text-gray-300 mt-4 px-4"></h3>
+        </div>
+
+        <main id="results-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Live search results will be injected here -->
+        </main>
+        
+        <div id="message-container" class="text-center py-16">
+             <p class="text-xl text-gray-400">ลองพิมพ์ชื่อหนัง หรือนักแสดงที่คุณสนใจได้เลย!</p>
+        </div>
+
+        <div id="load-more-container" class="text-center py-8 hidden">
+            <button id="load-more-btn" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-full transition duration-300">ค้นหาเพิ่มเติม</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- API Configuration ---
+        const YOUTUBE_API_KEY = "AIzaSyBUA62FPwffRrC9QXukulJWGUHy59ksZLw"; // <--- ใส่ API Key ของคุณที่นี่
+
+        // --- Global State ---
+        let currentQuery = '';
+        let nextPageToken = '';
+
+        // --- DOM Elements ---
+        const searchInput = document.getElementById('search-input');
+        const resultsContainer = document.getElementById('results-container');
+        const messageContainer = document.getElementById('message-container');
+        const playerWrapper = document.getElementById('player-wrapper');
+        const playerFrame = document.getElementById('youtube-player');
+        const playerTitle = document.getElementById('player-title');
+        const closePlayerBtn = document.getElementById('close-player-btn');
+        const loadMoreContainer = document.getElementById('load-more-container');
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        // เพิ่ม: DOM Elements สำหรับปุ่มใหม่
+        const externalSearchContainer = document.getElementById('external-search-container');
+        const searchFacebookBtn = document.getElementById('search-facebook-btn');
+        const searchTiktokBtn = document.getElementById('search-tiktok-btn');
+
+        // --- Debounce Function ---
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // --- Search Logic ---
+        const searchYouTube = async (query, pageToken = '') => {
+            if (!query) {
+                resultsContainer.innerHTML = '';
+                messageContainer.innerHTML = `<p class="text-xl text-gray-400">ลองพิมพ์ชื่อหนัง หรือนักแสดงที่คุณสนใจได้เลย!</p>`;
+                externalSearchContainer.classList.add('hidden'); // ซ่อนปุ่มเมื่อไม่มีคำค้นหา
+                return;
+            }
+            
+            if (!YOUTUBE_API_KEY) {
+                messageContainer.innerHTML = `<p class="text-xl text-red-400">ข้อผิดพลาด: กรุณาใส่ YouTube API Key ในโค้ดก่อนใช้งาน</p>`;
+                return;
+            }
+
+            if (!pageToken) {
+                resultsContainer.innerHTML = '';
+                messageContainer.innerHTML = `<div class="loader"></div><p class="mt-4">กำลังค้นหา...</p>`;
+            } else {
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.textContent = 'กำลังโหลด...';
+            }
+
+            const API_URL = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoLicense=any&maxResults=20&key=${YOUTUBE_API_KEY}&pageToken=${pageToken}`;
+
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+                
+                nextPageToken = data.nextPageToken;
+                displayResults(data.items, !pageToken);
+                externalSearchContainer.classList.remove('hidden'); // แสดงปุ่มเมื่อค้นหาสำเร็จ
+            } catch (error) {
+                console.error('Error fetching data from YouTube API:', error);
+                messageContainer.innerHTML = `<p class="text-xl text-red-400">เกิดข้อผิดพลาดในการค้นหา: ${error.message}</p>`;
+                externalSearchContainer.classList.add('hidden'); // ซ่อนปุ่มเมื่อเกิดข้อผิดพลาด
+            } finally {
+                 loadMoreBtn.disabled = false;
+                 loadMoreBtn.textContent = 'ค้นหาเพิ่มเติม';
+            }
+        };
+
+        // --- Event Listeners ---
+        searchInput.addEventListener('input', debounce((e) => {
+            const query = e.target.value.trim();
+            currentQuery = query;
+            nextPageToken = '';
+            playerWrapper.classList.add('hidden');
+            searchYouTube(query);
+        }, 500));
+
+        loadMoreBtn.addEventListener('click', () => {
+            if (currentQuery && nextPageToken) {
+                searchYouTube(currentQuery, nextPageToken);
+            }
+        });
+
+        closePlayerBtn.addEventListener('click', () => {
+            playerWrapper.classList.add('hidden');
+            playerFrame.src = '';
+        });
+
+        // เพิ่ม: Event Listeners สำหรับปุ่มค้นหาในแพลตฟอร์มอื่น
+        searchFacebookBtn.addEventListener('click', () => {
+            if (currentQuery) {
+                const url = `https://www.facebook.com/search/videos/?q=${encodeURIComponent(currentQuery)}`;
+                window.open(url, '_blank');
+            }
+        });
+
+        searchTiktokBtn.addEventListener('click', () => {
+             if (currentQuery) {
+                const url = `https://www.tiktok.com/search/video?q=${encodeURIComponent(currentQuery)}`;
+                window.open(url, '_blank');
+            }
+        });
+
+        // --- Display Results Function ---
+        function displayResults(items, isNewSearch) {
+            if (isNewSearch) {
+                resultsContainer.innerHTML = '';
+            }
+
+            if (items.length === 0 && isNewSearch) {
+                messageContainer.innerHTML = `<p class="text-xl text-gray-400">ไม่พบผลลัพธ์ที่ตรงกับ "${searchInput.value}"</p>`;
+                loadMoreContainer.classList.add('hidden');
+            } else {
+                messageContainer.innerHTML = '';
+                
+                const sortedItems = items.sort((a, b) => {
+                    const titleA = a.snippet.title.toLowerCase();
+                    const titleB = b.snippet.title.toLowerCase();
+                    const query = currentQuery.toLowerCase();
+                    const scoreA = titleA.startsWith(query) ? 2 : titleA.includes(query) ? 1 : 0;
+                    const scoreB = titleB.startsWith(query) ? 2 : titleB.includes(query) ? 1 : 0;
+                    return scoreB - scoreA;
+                });
+
+                sortedItems.forEach(item => {
+                    const videoId = item.id.videoId;
+                    const snippet = item.snippet;
+                    const poster = snippet.thumbnails.high.url;
+                    const title = snippet.title;
+                    const channel = snippet.channelTitle;
+
+                    const card = document.createElement('div');
+                    card.className = 'card bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700 flex flex-col';
+                    card.dataset.videoid = videoId;
+                    card.dataset.title = title;
+
+                    card.innerHTML = `
+                        <img src="${poster}" alt="${title}" class="w-full h-auto object-cover pointer-events-none">
+                        <div class="p-4 flex flex-col flex-grow">
+                            <h3 class="font-bold text-lg text-cyan-400 h-14 overflow-hidden pointer-events-none">${title}</h3>
+                            <div class="mt-auto pt-2">
+                                <p class="text-sm text-gray-400 mb-3 pointer-events-none">
+                                    จากช่อง: <span class="font-semibold">${channel}</span>
+                                </p>
+                                <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" class="block w-full text-center bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-lg transition duration-300 text-sm">
+                                    ดูใน YouTube
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    
+                    card.addEventListener('click', (e) => {
+                        if (e.target.tagName.toLowerCase() === 'a') return;
+                        
+                        const clickedVideoId = card.dataset.videoid;
+                        const clickedVideoTitle = card.dataset.title;
+
+                        playerFrame.src = `https://www.youtube.com/embed/${clickedVideoId}?autoplay=1`;
+                        playerTitle.textContent = clickedVideoTitle;
+                        playerWrapper.classList.remove('hidden');
+                        playerWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+
+                    resultsContainer.appendChild(card);
+                });
+
+                if (nextPageToken) {
+                    loadMoreContainer.classList.remove('hidden');
+                } else {
+                    loadMoreContainer.classList.add('hidden');
+                }
+            }
+        }
+        
+        // --- Coffee Button Logic ---
+        document.getElementById('coffee-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('ขอบคุณที่สนับสนุน! คุณสามารถเปลี่ยนลิงก์นี้เป็นหน้าเพจรับบริจาคของคุณได้ครับ');
+        });
+
+    </script>
+
+</body>
+</html>
