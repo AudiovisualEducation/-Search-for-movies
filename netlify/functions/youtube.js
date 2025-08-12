@@ -1,8 +1,7 @@
 // This is the Netlify Function that acts as a secure backend.
 // File path should be: /netlify/functions/youtube.js
 
-// fetch is available with Node.js 18+ on Netlify
-const fetch = require('node-fetch');
+// The 'require' line is removed because Netlify's environment has fetch built-in.
 
 exports.handler = async function(event, context) {
   // Get the search query and page token from the frontend request
@@ -15,7 +14,7 @@ exports.handler = async function(event, context) {
   const API_URL = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoLicense=any&maxResults=20&key=${API_KEY}&pageToken=${pageToken || ''}`;
 
   try {
-    // Call the YouTube API
+    // Call the YouTube API using the built-in fetch
     const response = await fetch(API_URL);
     const data = await response.json();
 
