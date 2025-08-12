@@ -75,20 +75,30 @@
 
         <header class="flex justify-between items-center mb-8">
             <h1 class="text-2xl md:text-4xl font-bold text-cyan-400 tracking-wider">MOVIEFINDER</h1>
-            <!-- แก้ไข: แก้ไข href และลบ id ที่ซ้ำซ้อน -->
-            <a href="https://www.buymeacoffee.com/pkmovie" target="_blank" id="coffee-btn" class="coffee-button bg-pink-300 text-gray-900 font-bold py-2 px-4 rounded-full flex items-center shadow-lg">
-                <span>เลี้ยงกาแฟแอดมิน</span>
+            <!-- แก้ไข: เพิ่มภาษาอังกฤษ -->
+            <a href="https://www.buymeacoffee.com/pkmovie" target="_blank" id="coffee-btn" class="coffee-button bg-pink-300 text-gray-900 font-bold py-2 px-4 rounded-full flex items-center justify-center text-center shadow-lg">
+                <div class="flex flex-col leading-tight">
+                    <span>เลี้ยงกาแฟแอดมิน</span>
+                    <small class="text-xs font-normal opacity-75">Support the Admin</small>
+                </div>
             </a>
         </header>
         
         <div class="search-container rounded-2xl p-8 md:p-16 mb-8 text-center shadow-2xl">
-            <h2 class="text-3xl md:text-5xl font-bold mb-4 text-white">ค้นพบหนัง ซีรีส์ และคลิปที่คุณชื่นชอบ</h2>
-            <p class="text-gray-300 mb-8 max-w-2xl mx-auto">แหล่งรวมคอนเทนต์ฟรี ถูกลิขสิทธิ์ ส่งตรงถึงหน้าจอคุณ</p>
+            <!-- แก้ไข: เพิ่มภาษาอังกฤษ -->
+            <h2 class="text-3xl md:text-5xl font-bold mb-2 text-white">ค้นพบหนัง ซีรีส์ และคลิปที่คุณชื่นชอบ</h2>
+            <p class="text-lg text-gray-300 mb-4">Discover your favorite movies, series, and clips</p>
+            <p class="text-gray-300 mt-4 mb-2 max-w-2xl mx-auto">แหล่งรวมคอนเทนต์ฟรี ถูกลิขสิทธิ์ ส่งตรงถึงหน้าจอคุณ</p>
+            <p class="text-gray-400 mb-8 max-w-2xl mx-auto">A collection of free, legal content, delivered to your screen</p>
+            
             <form id="search-form" class="max-w-2xl mx-auto" onsubmit="return false;">
                 <div class="flex items-center bg-gray-900 rounded-full shadow-lg p-2 border-2 border-gray-700 focus-within:border-cyan-500 focus-within:ring-2 focus-within:ring-cyan-500/50 transition-all duration-300">
                     <input type="text" id="search-input" placeholder="พิมพ์เพื่อค้นหาทันที..." class="w-full bg-transparent border-none text-white focus:ring-0 focus:outline-none text-lg px-4 py-2 placeholder-gray-500">
                 </div>
             </form>
+            <!-- แก้ไข: เพิ่มประโยคเด็ด -->
+            <p class="text-sm text-gray-400 mt-4 italic">"Can't find what you're looking for? Search with us."</p>
+
             <div id="external-search-container" class="mt-6 hidden">
                 <p class="text-gray-400 mb-3">หรือค้นหาเพิ่มเติมในแพลตฟอร์มอื่น:</p>
                 <div class="flex justify-center items-center space-x-4">
@@ -119,7 +129,9 @@
         </main>
         
         <div id="message-container" class="text-center py-16">
+             <!-- แก้ไข: เพิ่มภาษาอังกฤษ -->
              <p class="text-xl text-gray-400">ลองพิมพ์ชื่อหนัง หรือนักแสดงที่คุณสนใจได้เลย!</p>
+             <p class="text-md text-gray-500 mt-2">Try typing a movie title or an actor you're interested in!</p>
         </div>
 
         <div id="load-more-container" class="text-center py-8 hidden">
@@ -163,7 +175,11 @@
         const searchYouTube = async (query, pageToken = '') => {
             if (!query) {
                 resultsContainer.innerHTML = '';
-                messageContainer.innerHTML = `<p class="text-xl text-gray-400">ลองพิมพ์ชื่อหนัง หรือนักแสดงที่คุณสนใจได้เลย!</p>`;
+                // แก้ไข: เพิ่มภาษาอังกฤษในข้อความเริ่มต้น
+                messageContainer.innerHTML = `
+                    <p class="text-xl text-gray-400">ลองพิมพ์ชื่อหนัง หรือนักแสดงที่คุณสนใจได้เลย!</p>
+                    <p class="text-md text-gray-500 mt-2">Try typing a movie title or an actor you're interested in!</p>
+                `;
                 externalSearchContainer.classList.add('hidden');
                 return;
             }
@@ -318,7 +334,6 @@
                 html: `
                     <p class="text-gray-600 mb-4">เลือกช่องทางที่สะดวกเพื่อสนับสนุนการพัฒนาเว็บครับ</p>
                     <div class="flex flex-col space-y-3">
-                        <!-- แก้ไข: แก้ไข href ให้ถูกต้อง -->
                         <a href="https://www.buymeacoffee.com/pkmovie" target="_blank" class="swal2-confirm swal2-styled" style="background-color: #FFDD00; color: black; text-decoration: none;">
                             Buy Me a Coffee (บัตรเครดิต/PayPal)
                         </a>
