@@ -72,12 +72,11 @@
     <div class="container mx-auto p-4 md:p-8">
 
         <header class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl md:text-4xl font-bold text-cyan-400 tracking-wider">MovieFinder</h1>
-            <a href="#" id="coffee-btn" class="coffee-button bg-pink-300 text-gray-900 font-bold py-2 px-4 rounded-full flex items-center space-x-2 shadow-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.25 2.25c.39-.52.99-.84 1.65-.84h.008c.66 0 1.26.32 1.65.84C18.3 3.05 19 4.23 19 5.5V8h-1V5.5c0-1.02-.45-1.9-1.16-2.49a.6.6 0 00-.84.6V8h-1V3.75a.6.6 0 00-.84-.6C13.45 2.65 13 3.53 13 4.5V8H3v2.5A2.5 2.5 0 005.5 13H8v4.5A2.5 2.5 0 0010.5 20h.008a2.5 2.5 0 002.5-2.5V13h2.5a2.5 2.5 0 002.5-2.5V8h-1V5.5c0-1.27.7-2.45 1.75-3.25z" />
-                </svg>
-                <span class="hidden md:inline">เลี้ยงกาแฟ</span>
+            <!-- แก้ไข: เปลี่ยนชื่อเป็นตัวพิมพ์ใหญ่ -->
+            <h1 class="text-2xl md:text-4xl font-bold text-cyan-400 tracking-wider">MOVIEFINDER</h1>
+            <!-- แก้ไข: เอารูปออกและเปลี่ยนข้อความ -->
+            <a href="#" id="coffee-btn" class="coffee-button bg-pink-300 text-gray-900 font-bold py-2 px-4 rounded-full flex items-center shadow-lg">
+                <span>เลี้ยงกาแฟแอดมิน</span>
             </a>
         </header>
         
@@ -89,7 +88,6 @@
                     <input type="text" id="search-input" placeholder="พิมพ์เพื่อค้นหาทันที..." class="w-full bg-transparent border-none text-white focus:ring-0 focus:outline-none text-lg px-4 py-2 placeholder-gray-500">
                 </div>
             </form>
-            <!-- เพิ่ม: ปุ่มค้นหาในแพลตฟอร์มอื่น -->
             <div id="external-search-container" class="mt-6 hidden">
                 <p class="text-gray-400 mb-3">หรือค้นหาเพิ่มเติมในแพลตฟอร์มอื่น:</p>
                 <div class="flex justify-center items-center space-x-4">
@@ -147,7 +145,6 @@
         const closePlayerBtn = document.getElementById('close-player-btn');
         const loadMoreContainer = document.getElementById('load-more-container');
         const loadMoreBtn = document.getElementById('load-more-btn');
-        // เพิ่ม: DOM Elements สำหรับปุ่มใหม่
         const externalSearchContainer = document.getElementById('external-search-container');
         const searchFacebookBtn = document.getElementById('search-facebook-btn');
         const searchTiktokBtn = document.getElementById('search-tiktok-btn');
@@ -166,7 +163,7 @@
             if (!query) {
                 resultsContainer.innerHTML = '';
                 messageContainer.innerHTML = `<p class="text-xl text-gray-400">ลองพิมพ์ชื่อหนัง หรือนักแสดงที่คุณสนใจได้เลย!</p>`;
-                externalSearchContainer.classList.add('hidden'); // ซ่อนปุ่มเมื่อไม่มีคำค้นหา
+                externalSearchContainer.classList.add('hidden');
                 return;
             }
             
@@ -183,7 +180,7 @@
                 loadMoreBtn.textContent = 'กำลังโหลด...';
             }
 
-            const API_URL = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&videoLicense=any&maxResults=20&key=${YOUTUBE_API_KEY}&pageToken=${pageToken}`;
+            const API_URL = `/.netlify/functions/youtube?query=${encodeURIComponent(query)}&pageToken=${pageToken}`;
 
             try {
                 const response = await fetch(API_URL);
@@ -195,11 +192,11 @@
                 
                 nextPageToken = data.nextPageToken;
                 displayResults(data.items, !pageToken);
-                externalSearchContainer.classList.remove('hidden'); // แสดงปุ่มเมื่อค้นหาสำเร็จ
+                externalSearchContainer.classList.remove('hidden');
             } catch (error) {
-                console.error('Error fetching data from YouTube API:', error);
+                console.error('Error fetching data from Netlify function:', error);
                 messageContainer.innerHTML = `<p class="text-xl text-red-400">เกิดข้อผิดพลาดในการค้นหา: ${error.message}</p>`;
-                externalSearchContainer.classList.add('hidden'); // ซ่อนปุ่มเมื่อเกิดข้อผิดพลาด
+                externalSearchContainer.classList.add('hidden');
             } finally {
                  loadMoreBtn.disabled = false;
                  loadMoreBtn.textContent = 'ค้นหาเพิ่มเติม';
@@ -226,7 +223,6 @@
             playerFrame.src = '';
         });
 
-        // เพิ่ม: Event Listeners สำหรับปุ่มค้นหาในแพลตฟอร์มอื่น
         searchFacebookBtn.addEventListener('click', () => {
             if (currentQuery) {
                 const url = `https://www.facebook.com/search/videos/?q=${encodeURIComponent(currentQuery)}`;
