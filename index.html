@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ค้นหาหนัง ซีรีส์ คลิปฟรี ถูกลิขสิทธิ์</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- เพิ่ม: ไลบรารีสำหรับสร้าง Pop-up สวยงาม -->
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -72,10 +74,9 @@
     <div class="container mx-auto p-4 md:p-8">
 
         <header class="flex justify-between items-center mb-8">
-            <!-- แก้ไข: เปลี่ยนชื่อเป็นตัวพิมพ์ใหญ่ -->
             <h1 class="text-2xl md:text-4xl font-bold text-cyan-400 tracking-wider">MOVIEFINDER</h1>
-            <!-- แก้ไข: เอารูปออกและเปลี่ยนข้อความ -->
-            <a href="#" id="coffee-btn" class="coffee-button bg-pink-300 text-gray-900 font-bold py-2 px-4 rounded-full flex items-center shadow-lg">
+            <!-- แก้ไข: แก้ไข href และลบ id ที่ซ้ำซ้อน -->
+            <a href="https://www.buymeacoffee.com/pkmovie" target="_blank" id="coffee-btn" class="coffee-button bg-pink-300 text-gray-900 font-bold py-2 px-4 rounded-full flex items-center shadow-lg">
                 <span>เลี้ยงกาแฟแอดมิน</span>
             </a>
         </header>
@@ -311,7 +312,36 @@
         // --- Coffee Button Logic ---
         document.getElementById('coffee-btn').addEventListener('click', (e) => {
             e.preventDefault();
-            alert('ขอบคุณที่สนับสนุน! คุณสามารถเปลี่ยนลิงก์นี้เป็นหน้าเพจรับบริจาคของคุณได้ครับ');
+            
+            Swal.fire({
+                title: 'เลี้ยงกาแฟแอดมิน',
+                html: `
+                    <p class="text-gray-600 mb-4">เลือกช่องทางที่สะดวกเพื่อสนับสนุนการพัฒนาเว็บครับ</p>
+                    <div class="flex flex-col space-y-3">
+                        <!-- แก้ไข: แก้ไข href ให้ถูกต้อง -->
+                        <a href="https://www.buymeacoffee.com/pkmovie" target="_blank" class="swal2-confirm swal2-styled" style="background-color: #FFDD00; color: black; text-decoration: none;">
+                            Buy Me a Coffee (บัตรเครดิต/PayPal)
+                        </a>
+                        <button id="promptpay-btn" class="swal2-confirm swal2-styled" style="background-color: #06b6d4;">
+                            PromptPay (สแกน QR)
+                        </button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                willOpen: () => {
+                    const promptpayBtn = document.getElementById('promptpay-btn');
+                    promptpayBtn.addEventListener('click', () => {
+                        Swal.fire({
+                            title: 'สแกนเพื่อสนับสนุน',
+                            imageUrl: 'https://i.postimg.cc/xTmgtPfN/PKbank.png',
+                            imageWidth: 250,
+                            imageHeight: 250,
+                            imageAlt: 'PromptPay QR Code',
+                            confirmButtonText: 'ขอบคุณครับ!'
+                        });
+                    });
+                }
+            });
         });
 
     </script>
